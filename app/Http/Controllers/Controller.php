@@ -9,18 +9,19 @@ class Controller extends BaseController
 {
     public $domain = 'http://jwgl.bzmc.edu.cn';
 
-    public function login()
+    public function login(Request $request)
     {
-        $username = '';
-        $password = '';
+        $username = $request->input('uid');
+        $password = $request->input('pwd');
         $login = shell_exec("/usr/bin/python3 ../login.py {$username} {$password}");
         return $login;
     }
 
     public function course(Request $request)
     {
-        $cookie = $request->input('cookie');
-        $cookie = $this->login();
+        $username = $request->input('uid');
+        $password = $request->input('pwd');
+        $cookie = shell_exec("/usr/bin/python3 ../login.py {$username} {$password}");
         $cookie = json_decode($cookie, true);
         $cookie = "JSESSIONID={$cookie['JSESSIONID']}; route={$cookie['route']}";
 
