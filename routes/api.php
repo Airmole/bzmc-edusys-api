@@ -16,3 +16,4 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/login', [\App\Http\Controllers\Controller::class, 'login']);
 Route::get('/course', [\App\Http\Controllers\Controller::class, 'course']);
+Route::get('/score', [\App\Http\Controllers\Controller::class, 'score']);

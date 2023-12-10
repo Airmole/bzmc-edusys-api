@@ -9,11 +9,13 @@ class Controller extends BaseController
 {
     public $domain = 'http://jwgl.bzmc.edu.cn';
 
+    public $python = '/usr/bin/python3';
+
     public function login(Request $request)
     {
         $username = $request->input('uid');
         $password = $request->input('pwd');
-        $login = shell_exec("/usr/bin/python3 ../login.py {$username} {$password}");
+        $login = $this->getLogin($username, $password);
         return $login;
     }
 
@@ -21,7 +23,7 @@ class Controller extends BaseController
     {
         $username = $request->input('uid');
         $password = $request->input('pwd');
-        $cookie = shell_exec("/usr/bin/python3 ../login.py {$username} {$password}");
+        $cookie = $this->getLogin($username, $password);
         $cookie = json_decode($cookie, true);
         $cookie = "JSESSIONID={$cookie['JSESSIONID']}; route={$cookie['route']}";
 
@@ -29,6 +31,23 @@ class Controller extends BaseController
         $url = $this->domain . '/jwglxt/kbcx/xskbcx_cxXsgrkb.html?gnmkdm=N2151&su=';
         $postData = 'xnm=2023&xqm=3&kzlx=ck&xsdm=';
         $result = $this->httpPost($url, $postData, $cookie);
+        return $result;
+    }
+
+    public function score(Request $request)
+    {
+        $username = $request->input('uid');
+        $password = $request->input('pwd');
+        $cookie = $this->getLogin($username, $password);
+        $cookie = json_decode($cookie, true);
+        $cookie = "JSESSIONID={$cookie['JSESSIONID']}; route={$cookie['route']}";
+
+        $url = $this->domain . "/jwglxt/cjcx/cjcx_cxXsgrcj.html?doType=query&gnmkdm=N305005&su={$username}";
+        $milliseconds = microtime(true) * 1000;
+        $postData = "xnm=&xqm=&_search=false&nd={$milliseconds}&queryModel.showCount=5000&queryModel.currentPage=1&queryModel.sortName=&queryModel.sortOrder=asc&time=1";
+        $result = $this->httpPost($url, $postData, $cookie);
+        $result = json_decode($result, true);
+        array_reverse($result['items'], true);
         return $result;
     }
 
@@ -95,6 +114,17 @@ class Controller extends BaseController
 
         curl_close($curl);
         return $response;
+    }
+
+    /**
+     * @param $username
+     * @param $password
+     * @return false|string|null
+     */
+    public function getLogin($username, $password)
+    {
+        $login = shell_exec("{$this->python} ../login.py {$username} {$password}");
+        return $login;
     }
 
 }
